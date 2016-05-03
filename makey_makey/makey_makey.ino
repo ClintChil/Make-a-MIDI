@@ -88,7 +88,7 @@ boolean inputChanged;
 // Pin Numbers
 // input pin numbers for kickstarter production board
 int pinNumbers[NUM_INPUTS] = {
-  0, 1, 2, 3, 4, 5
+  A0, A1, 0, 1, 2, 3, 4, 5
 };
 
 //// input status LED pin numbers

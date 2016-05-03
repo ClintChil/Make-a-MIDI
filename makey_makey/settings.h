@@ -20,9 +20,9 @@ int keyCodes[NUM_INPUTS] = {
   'e',                // pin
   'f',                // pin
   'g',                // pin
-  'a'                // pin
-//  'B',                // pin
-//  'C',                // pin
+  'a',                // pin
+  'b',                // pin
+  'c'                 // pin
 };
 
 //int keyCodes[NUM_INPUTS] = {
