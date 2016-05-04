@@ -39,17 +39,6 @@
 //#define TARGET_LOOP_TIME 758  // (1/55 seconds) / 24 samples = 758 microseconds per sample 
 #define TARGET_LOOP_TIME 744  // (1/56 seconds) / 24 samples = 744 microseconds per sample 
 
-//// id numbers for mouse movement inputs (used in settings.h)
-//#define MOUSE_MOVE_UP       -1 
-//#define MOUSE_MOVE_DOWN     -2
-//#define MOUSE_MOVE_LEFT     -3
-//#define MOUSE_MOVE_RIGHT    -4
-
-//#if (ARDUINO > 10605)
-//  #include <Keyboard.h>
-//  #include <Mouse.h>
-//#endif
-
 #include "settings.h"
 
 /////////////////////////
@@ -63,8 +52,6 @@ typedef struct {
   byte bufferSum;
   boolean pressed;
   boolean prevPressed;
-//  boolean isMouseMotion;
-//  boolean isMouseButton;
   boolean isKey;
 } 
 MakeyMakeyInput;
@@ -77,13 +64,10 @@ MakeyMakeyInput inputs[NUM_INPUTS];
 int bufferIndex = 0;
 byte byteCounter = 0;
 byte bitCounter = 0;
-//int mouseMovementCounter = 0; // for sending mouse movement events at a slower interval
 
 int pressThreshold;
 int releaseThreshold;
 boolean inputChanged;
-
-//int mouseHoldCount[NUM_INPUTS]; // used to store mouse movement hold data
 
 // Pin Numbers
 // input pin numbers for kickstarter production board
@@ -114,8 +98,6 @@ void updateMeasurementBuffers();
 void updateBufferSums();
 void updateBufferIndex();
 void updateInputStates();
-//void sendMouseButtonEvents();
-//void sendMouseMovementEvents();
 void addDelay();
 //void cycleLEDs();
 //void danceLeds();
@@ -140,8 +122,6 @@ void loop()
   updateBufferSums();
   updateBufferIndex();
   updateInputStates();
-//  sendMouseButtonEvents();
-//  sendMouseMovementEvents();
 //  cycleLEDs();
 //  updateOutLEDs();
   addDelay();
@@ -180,9 +160,6 @@ void initializeArduino() {
   delay(4000); // allow us time to reprogram in case things are freaking out
 #endif
 
-//  Keyboard.begin();
-//  Mouse.begin();
-
 //  // enable HID for sending key presses
 //  BeanHid.enable();
 
@@ -219,8 +196,6 @@ void initializeInputs() {
     inputs[i].pressed = false;
     inputs[i].prevPressed = false;
 
-//    inputs[i].isMouseMotion = false;
-//    inputs[i].isMouseButton = false;
     inputs[i].isKey = false;
 
     if (inputs[i].keyCode) {
@@ -229,7 +204,7 @@ void initializeInputs() {
 #endif
       inputs[i].isKey = true;
     }
-
+// left this here so the above conditonal makes sense.
 //    if (inputs[i].keyCode < 0) {
 //#ifdef DEBUG_MOUSE
 //      Serial.println("GOT IT");  
@@ -331,13 +306,7 @@ void updateInputStates() {
           // turn off note on MIDI channel 0 with volume of 100 (0-127)
           BeanMidi.noteOff(CHANNEL0, inputs[i].keyCode, 100);
         }
-//        if (inputs[i].isMouseMotion) {  
-//          mouseHoldCount[i] = 0;  // input becomes released, reset mouse hold
-//        }
       }
-//      else if (inputs[i].isMouseMotion) {  
-//        mouseHoldCount[i]++; // input remains pressed, increment mouse hold
-//      }
     } 
     else if (!inputs[i].pressed) {
       if (inputs[i].bufferSum > pressThreshold) {  // input becomes pressed
@@ -357,158 +326,6 @@ void updateInputStates() {
   }
 #endif
 }
-
-/*
-///////////////////////////
- // SEND KEY EVENTS (obsolete, used in versions with pro micro bootloader)
- ///////////////////////////
- void sendKeyEvents() {
- if (inputChanged) {
- KeyReport report = {
- 0                                                        };
- for (int i=0; i<6; i++) {
- report.keys[i] = 0;
- } 
- int count = 0;
- for (int i=0; i<NUM_INPUTS; i++) {
- if (inputs[i].pressed && (count < 6)) {
- report.keys[count] = inputs[i].keyCode;
- 
- #ifdef DEBUG3
- Serial.println(report.keys[count]);
- #endif
- 
- count++;        
- }
- }
- if (count > 0) {
- report.modifiers = 0x00;
- report.reserved = 1;
- Keyboard.sendReport(&report);
- } 
- else {
- report.modifiers = 0x00;
- report.reserved = 0;
- Keyboard.sendReport(&report);
- }      
- } 
- else {
- // might need a delay here to compensate for the time it takes to send keyreport
- }
- }
- */
-
-///////////////////////////////
-//// SEND MOUSE BUTTON EVENTS 
-///////////////////////////////
-//void sendMouseButtonEvents() {
-//  if (inputChanged) {
-//    for (int i=0; i<NUM_INPUTS; i++) {
-//      if (inputs[i].isMouseButton) {
-//        if (inputs[i].pressed) {
-//          if (inputs[i].keyCode == MOUSE_LEFT) {
-//            Mouse.press(MOUSE_LEFT);
-//          } 
-//          if (inputs[i].keyCode == MOUSE_RIGHT) {
-//            Mouse.press(MOUSE_RIGHT);
-//          } 
-//        } 
-//        else if (inputs[i].prevPressed) {
-//          if (inputs[i].keyCode == MOUSE_LEFT) {
-//            Mouse.release(MOUSE_LEFT);
-//          } 
-//          if (inputs[i].keyCode == MOUSE_RIGHT) {
-//            Mouse.release(MOUSE_RIGHT);
-//          }           
-//        }
-//      }
-//    }
-//  }
-//}
-//
-////////////////////////////////
-//// SEND MOUSE MOVEMENT EVENTS
-////////////////////////////////
-//void sendMouseMovementEvents() {
-//  byte right = 0;
-//  byte left = 0;
-//  byte down = 0;
-//  byte up = 0;
-//  byte horizmotion = 0;
-//  byte vertmotion = 0;
-//
-//  mouseMovementCounter++;
-//  mouseMovementCounter %= MOUSE_MOTION_UPDATE_INTERVAL;
-//  if (mouseMovementCounter == 0) {
-//    for (int i=0; i<NUM_INPUTS; i++) {
-//#ifdef DEBUG_MOUSE
-//      //  Serial.println(inputs[i].isMouseMotion);  
-//#endif
-//
-//      if (inputs[i].isMouseMotion) {
-//        if (inputs[i].pressed) {
-//          if (inputs[i].keyCode == MOUSE_MOVE_UP) {
-//            // JL Changes (x4): now update to 1 + a hold factor, constrained between 1 and mouse max movement speed
-//            up=constrain(1+mouseHoldCount[i]/MOUSE_RAMP_SCALE, 1, MOUSE_MAX_PIXELS);
-//          }  
-//          if (inputs[i].keyCode == MOUSE_MOVE_DOWN) {
-//            down=constrain(1+mouseHoldCount[i]/MOUSE_RAMP_SCALE, 1, MOUSE_MAX_PIXELS);
-//          }  
-//          if (inputs[i].keyCode == MOUSE_MOVE_LEFT) {
-//            left=constrain(1+mouseHoldCount[i]/MOUSE_RAMP_SCALE, 1, MOUSE_MAX_PIXELS);
-//          }  
-//          if (inputs[i].keyCode == MOUSE_MOVE_RIGHT) {
-//            right=constrain(1+mouseHoldCount[i]/MOUSE_RAMP_SCALE, 1, MOUSE_MAX_PIXELS);
-//          }  
-//        }
-//      }
-//    }
-//
-//    // diagonal scrolling and left/right cancellation
-//    if(left > 0)
-//    {
-//      if(right > 0)
-//      {
-//        horizmotion = 0; // cancel horizontal motion because left and right are both pushed
-//      }
-//      else
-//      {
-//        horizmotion = -left; // left yes, right no
-//      }
-//    }
-//    else
-//    {
-//      if(right > 0)
-//      {
-//        horizmotion = right; // right yes, left no
-//      }
-//    }
-//
-//    if(down > 0)
-//    {
-//      if(up > 0)
-//      {
-//        vertmotion = 0; // cancel vertical motion because up and down are both pushed
-//      }
-//      else
-//      {
-//        vertmotion = down; // down yes, up no
-//      }
-//    }
-//    else
-//    {
-//      if (up > 0)
-//      {
-//        vertmotion = -up; // up yes, down no
-//      }
-//    }
-//    // now move the mouse
-//    if( !((horizmotion == 0) && (vertmotion==0)) )
-//    {
-//      Mouse.move(horizmotion * PIXELS_PER_MOUSE_STEP, vertmotion * PIXELS_PER_MOUSE_STEP);
-//    }
-//  }
-//}
 
 ///////////////////////////
 // ADD DELAY
