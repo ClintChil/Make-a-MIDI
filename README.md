@@ -13,3 +13,4 @@
 ## Reference
 
 - [BeanMidi Class Reference](https://punchthrough.com/files/bean/arduino-core-docs/1.8.0-beta2/class_bean_midi_class.html)
+- [Makey Makey on GitHub](https://github.com/sparkfun/MaKeyMaKey)
