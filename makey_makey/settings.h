@@ -15,14 +15,14 @@
 */
 
 int keyCodes[NUM_INPUTS] = {
-  'c',                // pin A0
-  'd',                // pin A1
-  'e',                // pin D0
-  'f',                // pin D1
-  'g',                // pin D2
-  'a',                // pin D3
-  'b',                // pin D4
-  'c'                 // pin D5
+  NOTE_C4,          // pin A0
+  NOTE_D4,          // pin A1
+  NOTE_E4,          // pin D0
+  NOTE_F4,          // pin D1
+  NOTE_G4,          // pin D2
+  NOTE_A4,          // pin D3
+  NOTE_B4,          // pin D4
+  NOTE_C5           // pin D5
 };
 
 //int keyCodes[NUM_INPUTS] = {

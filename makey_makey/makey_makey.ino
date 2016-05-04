@@ -183,8 +183,10 @@ void initializeArduino() {
 //  Keyboard.begin();
 //  Mouse.begin();
 
-  // enable HID for sending key presses
-  BeanHid.enable();
+//  // enable HID for sending key presses
+//  BeanHid.enable();
+
+  BeanMidi.enable();
 }
 
 ///////////////////////////
@@ -221,19 +223,26 @@ void initializeInputs() {
 //    inputs[i].isMouseButton = false;
     inputs[i].isKey = false;
 
-    if (inputs[i].keyCode < 0) {
+    if (inputs[i].keyCode) {
 #ifdef DEBUG_MOUSE
       Serial.println("GOT IT");  
 #endif
-
-//      inputs[i].isMouseMotion = true;
-    } 
-    else if ((inputs[i].keyCode == MOUSE_LEFT) || (inputs[i].keyCode == MOUSE_RIGHT)) {
-//      inputs[i].isMouseButton = true;
-    } 
-    else {
       inputs[i].isKey = true;
     }
+
+//    if (inputs[i].keyCode < 0) {
+//#ifdef DEBUG_MOUSE
+//      Serial.println("GOT IT");  
+//#endif
+//
+////      inputs[i].isMouseMotion = true;
+//    } 
+//    else if ((inputs[i].keyCode == MOUSE_LEFT) || (inputs[i].keyCode == MOUSE_RIGHT)) {
+////      inputs[i].isMouseButton = true;
+//    } 
+//    else {
+//      inputs[i].isKey = true;
+//    }
 #ifdef DEBUG
     Serial.println(i);
 #endif
@@ -318,8 +327,9 @@ void updateInputStates() {
         inputChanged = true;
         inputs[i].pressed = false;
         if (inputs[i].isKey) {
-//          Keyboard.release(inputs[i].keyCode);
-          BeanHid.releaseKey(inputs[i].keyCode);
+//          BeanHid.releaseKey(inputs[i].keyCode);
+          // turn off note on MIDI channel 0 with volume of 100 (0-127)
+          BeanMidi.noteOff(CHANNEL0, inputs[i].keyCode, 100);
         }
 //        if (inputs[i].isMouseMotion) {  
 //          mouseHoldCount[i] = 0;  // input becomes released, reset mouse hold
@@ -334,8 +344,9 @@ void updateInputStates() {
         inputChanged = true;
         inputs[i].pressed = true; 
         if (inputs[i].isKey) {
-//          Keyboard.press(inputs[i].keyCode);
-          BeanHid.holdKey(inputs[i].keyCode);
+//          BeanHid.holdKey(inputs[i].keyCode);
+          // play note on MIDI channel 0 with volume of 100 (0-127)
+          BeanMidi.noteOn(CHANNEL0, inputs[i].keyCode, 100);
         }
       }
     }
